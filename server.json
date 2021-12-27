@@ -1,21 +1,33 @@
 {
     "name": "Sonos",
-    "docs": "https://github.com/Einstein42/udi-sonos-poly",
+    "docs": "https://github.com/UniversalDevicesInc/udi-sonos-poly",
     "type": "python3",
     "executable": "sonos-poly.py",
     "install": "install.sh",
     "shortPoll": "5",
     "longPoll": "30",
-    "description": "Add Sonos control to the ISY994.",
+    "description": "Add Sonos control/status to the ISY.",
     "notice": "\"Sonos\" is trademarked., see http://www.sonos.com for more information. This Node Server is neither developed by nor endorsed by Sonos.",
+    "logLevel": "INFO",
+    "discover": true,
     "credits": [
         {
             "title": "udi-sonos-poly: A Polyglot v2 interface for Sonos",
             "author": "James Milne (Einstein.42)",
-            "version": "2.0.7",
-            "date": "December 12th, 2017",
-            "source": "https://github.com/Einstein42/udi-sonos-poly",
-            "license": "https://raw.githubusercontent.com/Einstein42/udi-sonos-poly/master/LICENSE"
+            "version": "3.0.0",
+            "date": "December 27th, 2021",
+            "source": "https://github.com/UniversalDevicesInc/udi-sonos-poly",
+            "license": "https://raw.githubusercontent.com/UniversalDevicesInc/udi-sonos-poly/master/LICENSE"
         }
-    ]
+    ],
+    "store": {
+	    "developer": "bpaauwe@bobsplace.com",
+	    "purchaseOptions": [
+		    {
+			    "isPerpetual": true,
+			    "price": 0
+		    }
+	    ]
+    }
+
 }
