@@ -33,6 +33,7 @@ class Controller(object):
 
     def discover(self, command = None):
         LOGGER.info('Starting Speaker Discovery...')
+        polyglot.Notices.clear()
         self.discovery = True
         speakers = soco.discover()
         if speakers:
@@ -45,6 +46,7 @@ class Controller(object):
                     LOGGER.info('Speaker {} already configured.'.format(speaker.player_name))
         else:
             LOGGER.info('No Speakers found. Are they powered on?')
+            polyglot.Notices['error'] = 'No speakers found. Make sure they are powered on and try Disover again.'
         self.discovery = False
 
 
