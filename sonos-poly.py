@@ -77,7 +77,7 @@ class Speaker(udi_interface.Node):
 
 
     def query(self, command=None):
-        self.update()
+        self.update('shortpoll')
         self.reportDrivers()
 
     def _get_state(self):
