@@ -4,7 +4,7 @@ Sonos NodeServer for UDI Polyglot v2
 by Einstein.42 (James Milne) milne.james@gmail.com
 """
 
-import polyinterface
+import udi_interface
 import sys
 import soco
 import requests
@@ -12,13 +12,9 @@ import json
 #add re library
 import re
 
-<<<<<<< Updated upstream
-LOGGER = polyinterface.LOGGER
-=======
 LOGGER = udi_interface.LOGGER
 # DD need to get custom params
 Custom = udi_interface.Custom
->>>>>>> Stashed changes
 
 with open('server.json') as data:
     SERVERDATA = json.load(data)
@@ -29,14 +25,10 @@ except (KeyError, ValueError):
     LOGGER.info('Version not found in server.json.')
     VERSION = '0.0.0'
 
-<<<<<<< Updated upstream
-class Controller(polyinterface.Controller):
-=======
 class Controller(object):
-
->>>>>>> Stashed changes
+	# DD - only need id
+	#id = 'sonosctl'
     def __init__(self, polyglot):
-        super().__init__(polyglot)
         self.name = 'Sonos Controller'
         # DD net to get custom params / add controller node
         self.poly = polyglot
@@ -45,24 +37,13 @@ class Controller(object):
         polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
         polyglot.ready()
         self.start()
+        ## DD not sure if we need to add the controller node
+		#self.poly.addNode(self)
 				
     def start(self):
-        LOGGER.info('Starting Sonos Polyglot v2 NodeServer version {}, polyinterface: {}'.format(VERSION, polyinterface.__version__))
+        LOGGER.info('Starting Sonos Polyglot v3 NodeServer version {}, udi_interface: {}'.format(VERSION, udi_interface.__version__))
         self.discover()
 
-<<<<<<< Updated upstream
-    def shortPoll(self):
-        if self.discovery:
-            return
-        for node in self.nodes:
-            self.nodes[node].update()
-
-    def update(self):
-        """
-        Nothing to update for the controller.
-        """
-        pass
-=======
     # DD add routine to load parameters
     def parameterHandler(self, params):
         LOGGER.info("running parameterHandler")
@@ -72,12 +53,11 @@ class Controller(object):
     def get_valid_node_name(self, name):
         name = bytes(name, 'utf-8').decode('utf-8','ignore')
         return re.sub(r"[<>'~!@#$%^&*(){}[\]?/\\;:\"']+","",name)
->>>>>>> Stashed changes
 
     def discover(self, command = None):
         LOGGER.info('Starting Speaker Discovery...')
+        polyglot.Notices.clear()
         self.discovery = True
-		# DD - added ability to scan on other subnets
         netscan = False 
         kwargs = {}
         for netparam in self.Params:
@@ -94,19 +74,17 @@ class Controller(object):
             LOGGER.info('Found {} Speaker(s)'.format(len(speakers)))
             for speaker in speakers:
                 address = speaker.uid[8:22].lower()
-                if address not in self.nodes:
-                    self.addNode(Speaker(self, self.address, address, speaker.player_name, speaker.ip_address))
+                if not polyglot.getNode(address):
+                    polyglot.addNode(Speaker(polyglot, address, address, speaker.player_name, speaker.ip_address))
                 else:
                     LOGGER.info('Speaker {} already configured.'.format(speaker.player_name))
         else:
             LOGGER.info('No Speakers found. Are they powered on?')
-<<<<<<< Updated upstream
-=======
             polyglot.Notices['error'] = 'No speakers found. Make sure they are powered on and try Disover again.'
 
         # DD - Add manual nodes
         LOGGER.info('add speakers from custom parameters')
-        
+        #
         for param in self.Params:
             # Look for customParam starting with sonos_
             match = re.match( "sonos_(.*)", param, re.I)
@@ -140,56 +118,41 @@ class Controller(object):
                             polyglot.addNode(Speaker(polyglot, address, address, sonos_name, sonos_ip))
                         else:
                             LOGGER.info('Speaker {} already configured.'.format(sonos_name))
->>>>>>> Stashed changes
         self.discovery = False
 
-    commands = {'DISCOVER': discover}
 
-class Speaker(polyinterface.Node):
-    def __init__(self, controller, primary, address, name, ip):
+class Speaker(udi_interface.Node):
+    def __init__(self, polyglot, primary, address, name, ip):
         self.ip = ip
         self.zone = soco.SoCo(self.ip)
         LOGGER.info('Sonos Speaker: {}@{} Current Volume: {}'\
                     .format(name, ip, self.zone.volume))
-        super().__init__(controller, primary, address, 'Sonos {}'.format(name))
+        super().__init__(polyglot, primary, address, 'Sonos {}'.format(name))
+
+        polyglot.subscribe(polyglot.START, self.start, address)
+        polyglot.subscribe(polyglot.POLL, self.update)
 
     def start(self):
         LOGGER.info("{} ready to rock!".format(self.name))
-<<<<<<< Updated upstream
-=======
-		# DD - fixed polling flag was using shortpoll, changed to shortPoll
         self.update('shortPoll')
 
     def update(self, pollflag):
-		# DD - fixed polling flag was using shortpoll, changed to shortPoll
         if pollflag == 'shortPoll':
             try:
                 self.setDriver('ST', self._get_state())
                 self.setDriver('SVOL', self.zone.volume)
                 self.setDriver('GV1', self.zone.bass)
                 self.setDriver('GV2', self.zone.treble)
-                # DD - added mute status variable
-				muteval = 1 if self.zone.mute == True else 0 
+                muteval = 1 if self.zone.mute == True else 0 
                 self.setDriver('GV3', muteval)
+                #LOGGER.info(self.zone.player_name)
+                #LOGGER.info('Mute Status %s', self.zone.mute)
             except requests.exceptions.ConnectionError as e:
                 LOGGER.error('Connection error to Speaker or ISY.: %s', e)
->>>>>>> Stashed changes
 
-    def update(self):
-        try:
-            self.setDriver('ST', self._get_state())
-            self.setDriver('SVOL', self.zone.volume)
-            self.setDriver('GV1', self.zone.bass)
-            self.setDriver('GV2', self.zone.treble)
-        except requests.exceptions.ConnectionError as e:
-            LOGGER.error('Connection error to Speaker or ISY.: %s', e)
 
     def query(self, command=None):
-<<<<<<< Updated upstream
-        self.update()
-=======
         self.update('shortPoll')
->>>>>>> Stashed changes
         self.reportDrivers()
 
     def _get_state(self):
@@ -242,12 +205,10 @@ class Speaker(polyinterface.Node):
 
     def _mute(self, command):
         self.zone.mute = True
-		# DD- added Mute status
         self.setDriver('GV3', 1)
 
     def _unmute(self, command):
         self.zone.mute = False
-		# DD - added UnMute status
         self.setDriver('GV3', 0)
 
     def _volume(self, command):
@@ -278,7 +239,7 @@ class Speaker(polyinterface.Node):
             if -10 <= val <= 10:
                 self.zone.treble = val
                 self.setDriver('GV2', val)
-    # DD - added mute status to drivers
+
     drivers = [{'driver': 'GV1', 'value': 0, 'uom': '56'},
                 {'driver': 'GV2', 'value': 0, 'uom': '56'},
                 {'driver': 'SVOL', 'value': 0, 'uom': '51'},
@@ -303,9 +264,17 @@ class Speaker(polyinterface.Node):
 
 if __name__ == "__main__":
     try:
-        polyglot = polyinterface.Interface('Sonos')
+        polyglot = udi_interface.Interface([])
         polyglot.start()
+        polyglot.setCustomParamsDoc()
+        polyglot.updateProfile()
         control = Controller(polyglot)
-        control.runForever()
+        
+        polyglot.subscribe(polyglot.DISCOVER, control.discover)
+
+        polyglot.ready()
+        control.start()
+
+        polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):
         sys.exit(0)
