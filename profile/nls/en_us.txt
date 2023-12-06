@@ -11,6 +11,7 @@ ST-sspk-ST-NAME = Status
 ST-sspk-SVOL-NAME = Volume
 ST-sspk-GV1-NAME = Bass
 ST-sspk-GV2-NAME = Treble
+ST-sspk-GV3-NAME = Muted
 
 CMD-sspk-PLAY-NAME = Play
 CMD-sspk-PAUSE-NAME = Pause
@@ -28,3 +29,4 @@ PLAY_MODE-0 = Playing
 PLAY_MODE-1 = Transitioning
 PLAY_MODE-2 = Paused
 PLAY_MODE-3 = Stopped
+
