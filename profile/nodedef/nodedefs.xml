@@ -21,6 +21,7 @@
             <st id="SVOL" editor="svolume" />
             <st id="GV1" editor="sinc" />
             <st id="GV2" editor="sinc" />
+            <st id="GV3" editor="bool" />
         </sts>
         <cmds>
             <sends />
