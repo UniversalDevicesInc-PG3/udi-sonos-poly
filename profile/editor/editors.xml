@@ -12,4 +12,7 @@
     <editor id="svolume">
         <range uom="51" min="0" max="100" prec="0" />
     </editor>
+    <editor id="cst">
+        <range uom="25" subset="0,1,2" nls="CST"/>
+    </editor>
 </editors>
