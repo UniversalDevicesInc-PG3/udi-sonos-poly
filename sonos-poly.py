@@ -76,13 +76,13 @@ class Controller(udi_interface.Node):
             LOGGER.info('Found {} Speaker(s)'.format(len(speakers)))
             for speaker in speakers:
                 address = speaker.uid[8:22].lower()
-                if not polyglot.getNode(address):
-                    polyglot.addNode(Speaker(polyglot,"sonosctrl", address, speaker.player_name, speaker.ip_address))
-                else:
-                    LOGGER.info('Speaker {} already configured.'.format(speaker.player_name))
+                #if not polyglot.getNode(address):
+                polyglot.addNode(Speaker(polyglot,"sonosctrl", address, speaker.player_name, speaker.ip_address))
+                #else:
+                #    LOGGER.info('Speaker {} already configured.'.format(speaker.player_name))
         else:
             LOGGER.info('No Speakers found. Are they powered on?')
-            polyglot.Notices['error'] = 'No speakers found. Make sure they are powered on and try Disover again.'
+            polyglot.Notices['error'] = 'No speakers found. Make sure they are powered on and try Discover again.'
 
         # DD - Add manual nodes
         LOGGER.info('add speakers from custom parameters')
@@ -116,10 +116,10 @@ class Controller(udi_interface.Node):
                     if addit:
                         sonos_name = self.get_valid_node_name(cfgd['name'])
                         sonos_ip = self.get_valid_node_name(cfgd['host'])
-                        if not polyglot.getNode(address): 
-                            polyglot.addNode(Speaker(polyglot, "sonosctrl", address, sonos_name, sonos_ip))
-                        else:
-                            LOGGER.info('Speaker {} already configured.'.format(sonos_name))
+                        #if not polyglot.getNode(address): 
+                        polyglot.addNode(Speaker(polyglot, "sonosctrl", address, sonos_name, sonos_ip))
+                        #else:
+                        #    LOGGER.info('Speaker {} already configured.'.format(sonos_name))
         self.discovery = False
     
     def _cmd_discover(self, control):
