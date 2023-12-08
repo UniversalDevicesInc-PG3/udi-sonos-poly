@@ -4,6 +4,11 @@ ND-controller-ICON = GenericCtl
 ST-ctl-ST-NAME = NodeServer Online
 CMD-ctl-DISCOVER-NAME = Re-Discover
 
+# Controller Status
+CST-0 = Disconnected
+CST-1 = Connected
+CST-2 = Failed
+
 # Sonos Speakers
 ND-sonosspeaker-NAME = Sonos Speaker
 ND-sonosspeaker-ICON = GenericRsp

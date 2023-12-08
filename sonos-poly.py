@@ -25,29 +25,31 @@ except (KeyError, ValueError):
     LOGGER.info('Version not found in server.json.')
     VERSION = '0.0.0'
 
-class Controller(object):
-	# DD - only need id
-	#id = 'sonosctl'
-    def __init__(self, polyglot):
-        self.name = 'Sonos Controller'
+class Controller(udi_interface.Node):
+
+    id = 'controller'
+    def __init__(self, polyglot, primary, address, name):
+        super(Controller, self).__init__(polyglot, primary, address, name)
         # DD net to get custom params / add controller node
         self.poly = polyglot
         self.discovery = False
         self.Params = Custom(polyglot, 'customparams')
         polyglot.subscribe(polyglot.CUSTOMPARAMS, self.parameterHandler)
+        polyglot.subscribe(polyglot.DISCOVER, self.discover)
         polyglot.ready()
-        self.start()
-        ## DD not sure if we need to add the controller node
-		#self.poly.addNode(self)
+        #self.start()
+        polyglot.addNode(self, conn_status="ST")
 				
-    def start(self):
-        LOGGER.info('Starting Sonos Polyglot v3 NodeServer version {}, udi_interface: {}'.format(VERSION, udi_interface.__version__))
-        self.discover()
+    #def start(self):
+    #    LOGGER.info('Starting Sonos Polyglot v3 NodeServer version {}, udi_interface: {}'.format(VERSION, udi_interface.__version__))
+    #    self.discover()
 
     # DD add routine to load parameters
     def parameterHandler(self, params):
         LOGGER.info("running parameterHandler")
         self.Params.load(params)
+        self.discover()
+
         
 	## strip special characters from names	
     def get_valid_node_name(self, name):
@@ -75,7 +77,7 @@ class Controller(object):
             for speaker in speakers:
                 address = speaker.uid[8:22].lower()
                 if not polyglot.getNode(address):
-                    polyglot.addNode(Speaker(polyglot, address, address, speaker.player_name, speaker.ip_address))
+                    polyglot.addNode(Speaker(polyglot,"sonosctrl", address, speaker.player_name, speaker.ip_address))
                 else:
                     LOGGER.info('Speaker {} already configured.'.format(speaker.player_name))
         else:
@@ -115,11 +117,18 @@ class Controller(object):
                         sonos_name = self.get_valid_node_name(cfgd['name'])
                         sonos_ip = self.get_valid_node_name(cfgd['host'])
                         if not polyglot.getNode(address): 
-                            polyglot.addNode(Speaker(polyglot, address, address, sonos_name, sonos_ip))
+                            polyglot.addNode(Speaker(polyglot, "sonosctrl", address, sonos_name, sonos_ip))
                         else:
                             LOGGER.info('Speaker {} already configured.'.format(sonos_name))
         self.discovery = False
+    
+    def _cmd_discover(self, control):
+        self.discover()
 
+    drivers = [{'driver': 'ST', 'value': 1, 'uom': '25'}]
+
+
+    commands = {  'DISCOVER': _cmd_discover}
 
 class Speaker(udi_interface.Node):
     def __init__(self, polyglot, primary, address, name, ip):
@@ -258,7 +267,7 @@ class Speaker(udi_interface.Node):
                     'UNMUTE': _unmute,
                     'BASS': _bass,
                     'TREBLE': _treble,
-                    'VOLUME': _volume }
+                    'VOLUME': _volume}
 
     id = 'sonosspeaker'
 
@@ -268,12 +277,11 @@ if __name__ == "__main__":
         polyglot.start()
         polyglot.setCustomParamsDoc()
         polyglot.updateProfile()
-        control = Controller(polyglot)
+        Controller(polyglot, "sonosctrl", "sonosctrl", "Sonos Controller")
         
-        polyglot.subscribe(polyglot.DISCOVER, control.discover)
 
-        polyglot.ready()
-        control.start()
+        #polyglot.ready()
+        #control.start()
 
         polyglot.runForever()
     except (KeyboardInterrupt, SystemExit):
